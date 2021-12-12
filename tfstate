@@ -1,0 +1,81 @@
+Terraform state and imported an existing resource into Terraform's state
+1. Change into the infra directory which includes a Terraform configuration and initialized working directory:
+
+
+cd infra
+ 
+
+2. List all the files in the directory:
+
+
+ls -A
+
+
+The listing has two entries:
+
+main.tf: A Terraform configuration file
+.terraform: A directory created by the init command that includes the AWS Terraform provider plugin
+Also, observe that there is no terraform.tfstate file, indicating that Terraform is not currently managing any resources.
+
+ 
+
+3. View the contents of the main.tf configuration file:
+
+
+more main.tf
+
+
+
+ 
+
+4. Use the AWS command-line interface (CLI) to verify that a VPC with the Name tag set to Web VPC already exists:
+
+
+aws ec2 describe-vpcs --region us-west-2 --filter "Name=tag:Name,Values='Web VPC'"
+
+
+
+ 
+
+5. Import the VPC into Terraform's state
+
+
+terraform import aws_vpc.web_vpc <VpcId>
+where you replace <VpcId> with the value of the VpcId output by the previous command. T
+
+ 
+
+6. List the files in the current directory:
+
+ls
+
+
+Terraform has created the terraform.tfstate file to keep track of the resource it has imported.
+
+ 
+
+7. View the contents of the state file:
+
+
+more terraform.tfstate
+
+
+In the middle of the output is the resources property which includes the aws_vpc.web_vpc resource. The primary.attributes property includes all of the attributes Terraform stores for the resource. By keeping the attributes in the state, Terraform doesn't always need to send requests to the provider to query the attribute values. When we modify a configuration, Terraform can compare the configuration to the state to determine if any resource needs to be updated.
+
+ 
+
+8. Use the show command to show the attributes in the state file:
+
+
+terraform show
+
+9. Show the available state subcommands for working directly with the state:
+
+
+terraform state
+
+ 
+
+10. Use the state show subcommand to show the attributes of the web_vpc managed by Terraform:
+
+terraform state show aws_vpc.web_vpc
